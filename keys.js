@@ -16,3 +16,5 @@ exports.omdb = {
 exports.bandsInTown = {
     app_id: process.env.app_id
 }
+
+//module.exports = keys;
