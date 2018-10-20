@@ -119,34 +119,84 @@ function bandsInTownCall() {
 
 //calls and returns spotify data
 function spotifyApi() {
+    //converts the array that holds the data input from the user to as string
     nameArr = nameArr.join(" ");
+
+    //will hold the names of the artists
     var spotifyNames = [];
+
+    //will hold the data of the song based on the artist
     var nameSet = {};
+
+    //request spotify to run the search based on the name of the song
     spotify.search({ type: 'track', query: nameArr }, function (err, data) {
-        //console.log(data);
+        //handles errors in case the data does not return something
         if (err) {
             return console.log('Error occurred: ' + err);
         }
-        // (Note: The syntax below for parsing isn't obvious.
-        let spotifyData = data.tracks.items;
-        //console.log(spotifyData[0].album.artists[0].name);
-        //console.log(spotifyData[0]);
-        //console.log(responseBody);
-        for (let key in spotifyData) {
-            var artist = spotifyData[key].album.artists;
-            //console.log(artist);
-            for(let innerKey in artist){
-                var artistName = artist[innerKey].name;
-                //console.log(innerKey);
-                //console.log(artist[innerKey].name.valueOf());
-                nameSet[artist[innerKey].name.valueOf()] = {
 
-                };
+        // holds the data returned from spotify
+        let spotifyData = data.tracks.items;
+
+        //loops through data set of 20 call backs
+         for (let key in spotifyData) {
+            var artist = spotifyData[key].album.artists;
+            //output name of the song
+            var songName = spotifyData[key].name;
+
+            //make sure the name of the songs matches to the results from the api exactly
+            if(songName.toLowerCase().search(nameArr.toLowerCase()) === -1){
+                //keeps the loop going
+                continue;
             }
+
+            //output preview link to song from spotify
+            var previewLinkSong = spotifyData[key].external_urls.spotify;
+
+            //output the album the song is from
+            var albumName = spotifyData[key].album.name;
+
+            //initialize list of artists
+            let artistList = [];
+            
+            //loop through array of artist
+            for(let innerKey in artist){
+                //initialize artist name
+                var artistName = artist[innerKey].name;
+
+                //add artist name to the array that holds the list of artists
+                artistList.push(artistName);
+            }
+            //create a set that holds the information about the song query based on the name of the artist
+            nameSet[artistList.join(", ")] = {
+                //assigns the name of the song
+                songName: songName,
+                //assigns the link to the song in spotify
+                previewLinkSong: previewLinkSong,
+                //assigns the name of the album
+                albumName: albumName
+            };
         }
+        //loops through the data set of artists
         for(let keyName in nameSet){
-            spotifyNames.push(keyName);
+            //adds the data 
+            spotifyNames.push(
+                //add the name of the artist
+                "Artist: " + keyName + 
+
+                //add the name of the song
+                "\nSong's Name: " + nameSet[keyName].songName +
+
+                //add the url to the spotify song
+                "\nPreview Song in Spotify: " + nameSet[keyName].previewLinkSong +
+                
+                //add the name of the album
+                "\nAlbum's Name: " + nameSet[keyName].albumName +
+
+                //add a separator for easier output
+                "\n-------------------------------------------------------------------------------");
         }
-        console.log("Artists: " + spotifyNames.join(", "));
+        //output the data
+        console.log(spotifyNames.join("\n"));
     });
 }
